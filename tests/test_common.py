@@ -25,6 +25,9 @@ def test_allows_master_version(monkeypatch):
         class Hi(object):
             stdout = ['tmux master']
             stderr = None
+
+            def execute(self):
+                return self
         return Hi()
     monkeypatch.setattr(libtmux.common, 'tmux_cmd', mock_tmux_cmd)
 
@@ -42,6 +45,9 @@ def test_get_version_openbsd(monkeypatch):
     def mock_tmux_cmd(param):
         class Hi(object):
             stderr = ['tmux: unknown option -- V']
+
+            def execute(self):
+                return self
         return Hi()
     monkeypatch.setattr(libtmux.common, 'tmux_cmd', mock_tmux_cmd)
     monkeypatch.setattr(sys, 'platform', 'openbsd 5.2')
@@ -59,6 +65,9 @@ def test_get_version_too_low(monkeypatch):
     def mock_tmux_cmd(param):
         class Hi(object):
             stderr = ['tmux: unknown option -- V']
+
+            def execute(self):
+                return self
         return Hi()
     monkeypatch.setattr(libtmux.common, 'tmux_cmd', mock_tmux_cmd)
     with pytest.raises(LibTmuxException) as exc_info:
@@ -151,6 +160,12 @@ def test_tmux_cmd_raises_on_not_found():
         tmux_cmd('-V', tmux_search_paths=[], append_env_path=False)
 
     tmux_cmd('-V')
+
+
+def test_tmux_cmd_makes_cmd_available():
+    """tmux_cmd objects should make .cmd attribute available."""
+    command = tmux_cmd('-V')
+    assert hasattr(command, 'cmd')
 
 
 @pytest.mark.parametrize("session_name,raises,exc_msg_regex", [

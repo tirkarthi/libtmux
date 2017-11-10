@@ -141,7 +141,12 @@ class tmux_cmd(object):
 
     Usage::
 
-        proc = tmux_cmd('new-session', '-s%' % 'my session')
+        c = tmux_cmd('new-session', '-s%' % 'my session')
+
+        # You can actually see the command in the .cmd attribute
+        print(c.cmd)
+
+        proc = c.execute()
 
         if proc.stderr:
             raise exc.LibTmuxException(
@@ -178,6 +183,8 @@ class tmux_cmd(object):
 
         self.cmd = cmd
 
+    def execute(self):
+        cmd = self.cmd
         try:
             self.process = subprocess.Popen(
                 cmd,
@@ -213,6 +220,7 @@ class tmux_cmd(object):
             'self.stdout for %s: \n%s' %
             (' '.join(cmd), self.stdout)
         )
+        return self
 
 
 class TmuxMappingObject(collections.MutableMapping):
@@ -260,7 +268,7 @@ class TmuxMappingObject(collections.MutableMapping):
     def __getattr__(self, key):
         try:
             return self._info[self.formatter_prefix + key]
-        except:
+        except KeyError:
             raise AttributeError('%s has no property %s' %
                                  (self.__class__, key))
 
@@ -354,8 +362,8 @@ class TmuxRelationalObject(object):
 
 
 def which(exe=None, default_paths=[
-            '/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin'
-        ], append_env_path=True):
+          '/bin', '/sbin', '/usr/bin', '/usr/sbin', '/usr/local/bin'
+          ], append_env_path=True):
     """Return path of bin. Python clone of /usr/bin/which.
 
     from salt.util - https://www.github.com/saltstack/salt - license apache
@@ -413,7 +421,7 @@ def get_version():
     :returns: tmux version
     :rtype: :class:`distutils.version.LooseVersion`
     """
-    proc = tmux_cmd('-V')
+    proc = tmux_cmd('-V').execute()
     if proc.stderr:
         if proc.stderr[0] == 'tmux: unknown option -- V':
             if sys.platform.startswith("openbsd"):  # openbsd has no tmux -V

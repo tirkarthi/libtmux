@@ -96,7 +96,7 @@ class Server(TmuxRelationalObject, EnvironmentMixin):
             else:
                 raise ValueError('Server.colors must equal 88 or 256')
 
-        return tmux_cmd(*args, **kwargs)
+        return tmux_cmd(*args, **kwargs).execute()
 
     def _list_sessions(self):
         """Return list of sessions in :py:obj:`dict` form.
