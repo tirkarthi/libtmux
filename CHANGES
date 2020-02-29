@@ -5,6 +5,8 @@ Changelog
 Here you can find the recent changes to libtmux
 
 - Add ``project_urls`` to setup.py
+- Fix issue on local tests where env variables would cause
+  show-environment to pause tests indefinitely.
 
 0.8.2 <2019-06-02>
 ------------------
